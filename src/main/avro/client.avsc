@@ -1,0 +1,23 @@
+{"namespace": "org.example.vkalko.dataprocessing.model",
+ "type": "record",
+ "name": "Client",
+ "fields": [
+   {"name": "id", "type": "long"},
+   {"name": "name", "type": "string"},
+   {"name": "phone", "type": ["string", "null"]},
+   {"name": "address", "type": ["null",
+     {
+       "namespace": "org.example.vkalko.dataprocessing.model",
+       "type": "record",
+       "name": "Address",
+       "fields": [
+         {"name": "street", "type": ["string", "null"]},
+         {"name": "city", "type": ["string", "null"]},
+         {"name": "zip", "type": ["string", "null"]}
+       ]
+     }]
+   },
+   {"name": "month_payment", "type": "double"}
+ ]
+}
+
