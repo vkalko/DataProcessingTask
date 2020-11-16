@@ -19,12 +19,12 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Main {
+public class MainTest {
 
 
-    private static final Logger logger = Logger.getLogger(Main.class.getName());
+    private static final Logger logger = Logger.getLogger(MainTest.class.getName());
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
     }
 
@@ -99,7 +99,7 @@ public class Main {
         File file = new File("clients.avro");
         DatumReader<Client> clientDatumReader = new SpecificDatumReader<>(Client.class);
         DataFileReader<Client> dataFileReader = new DataFileReader<>(file, clientDatumReader);
-        Client client = null;
+        Client client;
         while (dataFileReader.hasNext()) {
             client = dataFileReader.next();
             System.out.println(client);
