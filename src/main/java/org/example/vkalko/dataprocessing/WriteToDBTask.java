@@ -8,44 +8,43 @@ import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * This class represents concurrent task, inserting data from queue into BigQuery.
+ * PushToQueueTask object included to check, if thread producing data is finished, to avoid loss of data.
+ */
 public class WriteToDBTask implements Runnable {
 
     private final BigQuery bigQuery;
     private final TableId tableId;
-    private final BlockingQueue<Map<String, Object>> queue;
-    private volatile boolean finished;
+    private final BlockingQueue<List<InsertAllRequest.RowToInsert>> queue;
+    private final PushToQueueTask pushToQueue;
 
     private static final Logger logger = Logger.getLogger(WriteToDBTask.class.getName());
 
-    public WriteToDBTask(BigQuery bigQuery, TableId tableId, BlockingQueue<Map<String, Object>> queue) {
+    public WriteToDBTask(BigQuery bigQuery, TableId tableId,
+                         BlockingQueue<List<InsertAllRequest.RowToInsert>> queue, PushToQueueTask pushToQueue) {
         this.bigQuery = bigQuery;
         this.tableId = tableId;
         this.queue = queue;
+        this.pushToQueue = pushToQueue;
     }
 
     @Override
     public void run() {
-        while (!finished || !queue.isEmpty()) {
+        long start = System.currentTimeMillis();
+        while (!pushToQueue.isFinished() || !queue.isEmpty()) {
             while (queue.isEmpty()) {
                 Thread.onSpinWait();
             }
             insertRow(queue.poll());
         }
-        logger.info("Task finished");
+        logger.info("Task finished in " + (System.currentTimeMillis() - start) / 1000 + " seconds.");
     }
 
-    public boolean isFinished() {
-        return finished;
-    }
-
-    public void setFinished(boolean finished) {
-        this.finished = finished;
-    }
-
-    public void insertRow(Map<String, Object> row) {
-        if (row == null) return;
+    public void insertRow(List<InsertAllRequest.RowToInsert> rows) {
+        if (rows == null) return;
         InsertAllResponse response = bigQuery.insertAll(InsertAllRequest.newBuilder(tableId).
-                addRow(row).
+                setRows(rows).
                 build());
         if (response.hasErrors()) {
             for (Map.Entry<Long, List<BigQueryError>> entry: response.getInsertErrors().entrySet()) {

@@ -1,12 +1,14 @@
 package org.example.vkalko.dataprocessing.service;
 
+import com.google.cloud.storage.Blob;
 import org.example.vkalko.dataprocessing.model.Client;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 public interface AvroService {
 
     void serialize(Client[] records, String fileName) throws IOException;
 
-    void deserialize(String bucketName, String fileName) throws IOException, InterruptedException;
+    Iterator<Client> deserialize(Blob object) throws IOException;
 }
