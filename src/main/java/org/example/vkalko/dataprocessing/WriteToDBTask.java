@@ -1,11 +1,10 @@
 package org.example.vkalko.dataprocessing;
 
-import com.google.cloud.bigquery.*;
+import org.example.vkalko.dataprocessing.dao.ClientDAO;
+import org.example.vkalko.dataprocessing.model.Client;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -14,17 +13,17 @@ import java.util.logging.Logger;
  */
 public class WriteToDBTask implements Runnable {
 
-    private final BigQuery bigQuery;
-    private final TableId tableId;
-    private final BlockingQueue<List<InsertAllRequest.RowToInsert>> queue;
+    private final String tableName;
+    private final BlockingQueue<List<Client>> queue;
     private final PushToQueueTask pushToQueue;
+
+    private ClientDAO clientDAO;
 
     private static final Logger logger = Logger.getLogger(WriteToDBTask.class.getName());
 
-    public WriteToDBTask(BigQuery bigQuery, TableId tableId,
-                         BlockingQueue<List<InsertAllRequest.RowToInsert>> queue, PushToQueueTask pushToQueue) {
-        this.bigQuery = bigQuery;
-        this.tableId = tableId;
+    public WriteToDBTask(String tableName,
+                         BlockingQueue<List<Client>> queue, PushToQueueTask pushToQueue) {
+        this.tableName = tableName;
         this.queue = queue;
         this.pushToQueue = pushToQueue;
     }
@@ -32,24 +31,20 @@ public class WriteToDBTask implements Runnable {
     @Override
     public void run() {
         long start = System.currentTimeMillis();
-        while (!pushToQueue.isFinished() || !queue.isEmpty()) {
-            while (queue.isEmpty()) {
-                Thread.onSpinWait();
+        try {
+            while (!pushToQueue.isFinished() || !queue.isEmpty()) {
+                while (queue.isEmpty()) {
+                    Thread.onSpinWait();
+                }
+                clientDAO.insertAll(queue.poll(), tableName);
             }
-            insertRow(queue.poll());
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
         logger.info("Task finished in " + (System.currentTimeMillis() - start) / 1000 + " seconds.");
     }
 
-    public void insertRow(List<InsertAllRequest.RowToInsert> rows) {
-        if (rows == null) return;
-        InsertAllResponse response = bigQuery.insertAll(InsertAllRequest.newBuilder(tableId).
-                setRows(rows).
-                build());
-        if (response.hasErrors()) {
-            for (Map.Entry<Long, List<BigQueryError>> entry: response.getInsertErrors().entrySet()) {
-                logger.log(Level.SEVERE, entry.getValue().toString());
-            }
-        }
+    public void setClientDAO(ClientDAO clientDAO) {
+        this.clientDAO = clientDAO;
     }
 }

@@ -9,18 +9,13 @@ import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificDatumWriter;
-import org.example.vkalko.dataprocessing.WriteToDBTask;
 import org.example.vkalko.dataprocessing.model.Client;
 import org.example.vkalko.dataprocessing.service.AvroService;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Service
 public class AvroServiceImpl implements AvroService {
@@ -47,13 +42,26 @@ public class AvroServiceImpl implements AvroService {
     /**
      *
      * @param object object name in Google Storage used to retrieve data
-     * @throws IOException
+     * @throws IOException upon deserialization error
      */
     @Override
     public Iterator<Client> deserialize(Blob object) throws IOException {
         SeekableByteArrayInput byteArray = new SeekableByteArrayInput(object.getContent(Blob.BlobSourceOption.generationMatch()));
         DatumReader<Client> clientDatumReader = new SpecificDatumReader<>(Client.class);
         DataFileReader<Client> dataFileReader = new DataFileReader<>(byteArray, clientDatumReader);
+
+        return dataFileReader.iterator();
+    }
+
+    /**
+     *
+     * @param file object name in Google Storage used to retrieve data
+     * @throws IOException upon deserialization error
+     */
+    @Override
+    public Iterator<Client> deserialize(File file) throws IOException {
+        DatumReader<Client> clientDatumReader = new SpecificDatumReader<>(Client.class);
+        DataFileReader<Client> dataFileReader = new DataFileReader<>(file, clientDatumReader);
 
         return dataFileReader.iterator();
     }

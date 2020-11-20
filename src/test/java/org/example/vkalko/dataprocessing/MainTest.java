@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,6 +27,25 @@ public class MainTest {
 
     public static void main(String[] args) {
 
+    }
+
+    public static void deserializeTest() throws IOException, InterruptedException {
+        DatumReader<Client> datumReader = new SpecificDatumReader<>();
+        DataFileReader<Client> dataFileReader = new DataFileReader<>(new File("clients.avro"), datumReader);
+        BlockingQueue<List<Client>> qRequired = new ArrayBlockingQueue<>(2, true);
+        BlockingQueue<List<Client>> qComplete = new ArrayBlockingQueue<>(2, true);
+
+
+        PushToQueueTask pushToQueue = new PushToQueueTask(dataFileReader, qRequired, qComplete);
+        WriteToDBTask writeToDB1 = new WriteToDBTask("tableRequired", qRequired, pushToQueue);
+        WriteToDBTask writeToDB2 = new WriteToDBTask("tableComplete", qComplete, pushToQueue);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        executorService.submit(pushToQueue);
+        executorService.submit(writeToDB1);
+        executorService.submit(writeToDB2);
+        executorService.shutdown();
+        executorService.awaitTermination(60, TimeUnit.SECONDS);
     }
 
     public static void testInsertion() {
