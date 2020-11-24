@@ -36,5 +36,4 @@ public class AvroServiceImplTest {
         Assert.assertEquals(client, clientIterator.next());
 
     }
-
 }

@@ -14,14 +14,11 @@ public class ClientDAOImpl implements ClientDAO {
 
     private final BigQuery bigQuery;
 
-    @Value("${spring.cloud.gcp.config.project-id}")
-    private String projectId;
+    @Value("${spring.cloud.gcp.config.project-id}") private String projectId;
 
-    @Value("${spring.cloud.gcp.bigquery.dataset-name}")
-    private String datasetName;
+    @Value("${spring.cloud.gcp.bigquery.dataset-name}") private String datasetName;
 
-    @Value("${spring.cloud.gcp.bigquery.table-name-req}")
-    private final String tableRequired = "clients_required";
+    @Value("${spring.cloud.gcp.bigquery.table-name-req}") private String tableRequired;
 
     @Autowired
     public ClientDAOImpl() {

@@ -1,9 +1,11 @@
 package org.example.vkalko.dataprocessing.dto;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
+@NoArgsConstructor
 @Component
 public class PubSubNotificationDTO {
 
@@ -11,10 +13,9 @@ public class PubSubNotificationDTO {
     @Getter
     private Message message;
 
-    public PubSubNotificationDTO() {}
-
     @Setter
     @Getter
+    @NoArgsConstructor
     public class Message {
 
         private String data;
@@ -22,16 +23,9 @@ public class PubSubNotificationDTO {
         private String publishTime;
         private Attributes attributes;
 
-        public Message() {}
-
-        public Message(String data, String messageId) {
-            this.data = data;
-            this.messageId = messageId;
-        }
-
-
         @Setter
         @Getter
+        @NoArgsConstructor
         public class Attributes {
             private String bucketId;
             private String eventTime;
@@ -41,10 +35,6 @@ public class PubSubNotificationDTO {
             private String objectId;
             private String overwroteGeneration;
             private String payloadFormat;
-
-            public Attributes() {}
-
-
         }
     }
 }
