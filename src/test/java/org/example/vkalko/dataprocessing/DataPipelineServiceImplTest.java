@@ -1,7 +1,6 @@
 package org.example.vkalko.dataprocessing;
 
 import org.example.vkalko.dataprocessing.controller.web.StorageAPIController;
-import org.example.vkalko.dataprocessing.dao.ClientDAO;
 import org.example.vkalko.dataprocessing.dto.PubSubNotificationDTO;
 import org.example.vkalko.dataprocessing.service.AvroService;
 import org.example.vkalko.dataprocessing.service.DataPipelineService;
@@ -16,7 +15,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.IOException;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest

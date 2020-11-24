@@ -10,7 +10,6 @@ import org.example.vkalko.dataprocessing.service.AvroService;
 import org.example.vkalko.dataprocessing.service.DataPipelineService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +23,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -84,7 +84,7 @@ public class StorageAPIControllerTest {
 
     @Test(expected = ParsingException.class)
     public void shouldHandleParsingException() throws IOException {
-        Mockito.doThrow(new IOException()).when(dataPipelineService).proceed(any(), any());
+        doThrow(new IOException()).when(dataPipelineService).proceed(any(), any());
 
         PubSubNotificationDTO pubSubNotificationDTO = new PubSubNotificationDTO();
         PubSubNotificationDTO.Message message = pubSubNotificationDTO.new Message();
